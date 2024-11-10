@@ -1,4 +1,3 @@
-#include <chrono>
 #include <ctime>
 #include <exception>
 #include <fstream>
@@ -44,14 +43,13 @@ int main(int argc, char* argv[]) {
 
     // <base arguments>
     int base_argc = 2;
-    int amt_quotes, quote_len; // how many quotes of what length to print
+    int amt_quotes = 0, quote_len = 0; // how many quotes of what length to print
     // <\base arguments>
 
     bool parsing_value = false; // whether we're parsing a value for a preceding value argument
     char current_arg = -1;
     int current_base_arg = 0;
     if (argc > 1) {
-        bool hasInputSpec = false;
         for (int i = 1; i < argc; i++) {
             string arg(argv[i]);
             bool is_arg_def = arg.length() >= 2 && arg[0] == '-';
@@ -189,8 +187,6 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
-    chrono::high_resolution_clock clock;
-    chrono::time_point startTime = clock.now();
     for (int n = 0; n < amt_quotes; n++) {
         string result = "";
         for (int i = 0; i < quote_len; i++) {

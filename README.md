@@ -2,8 +2,10 @@
 qgen is a small utility to generate nonsense strings akin to what you'd find in Mindustry (game) b104.9, the April 1st build, with code adapted directly from there.
 
 ## Compiling
-Linux: `g++ qgen.cpp -o qgen`
-Windows: `g++ qgen.cpp -o qgen.exe`
+Linux: `./build.sh`<br>
+Windows: `./build.bat`
+
+This will put the ready executable into the `bin` subfolder.
 
 ## Usage
 Run it and do `./qgen -h`. This should print the following help notice:
