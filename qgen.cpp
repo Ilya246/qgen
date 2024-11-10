@@ -121,6 +121,7 @@ int main(int argc, char* argv[]) {
                     }
                 } else if (i == argc - 1) {
                     cerr << "No value provided for last argument." << endl;
+                    print_help = true;
                 }
             }
             // let the next iteration know if it's parsing a value
