@@ -1,5 +1,6 @@
 #include <chrono>
 #include <ctime>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -48,14 +49,11 @@ int main(int argc, char* argv[]) {
 
     bool parsing_value = false; // whether we're parsing a value for a preceding value argument
     char current_arg = -1;
-    int base_arg = 0;
+    int current_base_arg = 0;
     if (argc > 1) {
         bool hasInputSpec = false;
         for (int i = 1; i < argc; i++) {
             string arg(argv[i]);
-            if (!parsing_value && arg.length() < 2) {
-                continue;
-            }
             bool is_arg_def = arg.length() >= 2 && arg[0] == '-';
             if (is_arg_def) {
                 if (parsing_value) {
@@ -90,7 +88,7 @@ int main(int argc, char* argv[]) {
             if (!is_flag) { // we're not parsing a flag, so we're parsing a value argument or value
                 if (!next_is_value) {
                     if (!parsing_value && !is_arg_def) { // this is an orphan value so we're probably reading a base argument
-                        switch (base_arg) {
+                        switch (current_base_arg) {
                             case 0: {
                                 amt_quotes = stoi(arg);
                                 break;
@@ -104,7 +102,7 @@ int main(int argc, char* argv[]) {
                                 print_help = true;
                             }
                         }
-                        ++base_arg;
+                        ++current_base_arg;
                     } else {
                         string arg_value = is_arg_def ? arg.substr(2, arg.length() - 2) : arg;
                         switch (current_arg) {
@@ -131,21 +129,27 @@ int main(int argc, char* argv[]) {
             parsing_value = next_is_value;
         }
     }
-    if (base_arg < base_argc) {
-        print_help_message();
-        throw runtime_error("Not enough arguments provided.");
+    if (current_base_arg < base_argc) {
+        if (!print_help && argc > 1) {
+            print_help_message();
+            cerr << "Provided " << current_base_arg << " arguments, but " << base_argc << " are required." << endl;
+            return 1;
+        }
+        print_help = true;
     }
 
     bool stdout_output = force_stdout_output || !file_output;
 
     if (print_help) {
         print_help_message();
+        return 0;
     }
 
     if (override_filename.length() > 0) {
         ifstream quotes_override_s(override_filename);
         if (!quotes_override_s) {
-            throw runtime_error("Failed to open quote override file.");
+            cerr << "Failed to open quote override file." << endl;
+            return 1;
         }
         if (override_clear_quotes) {
             quotes.clear();
@@ -181,7 +185,8 @@ int main(int argc, char* argv[]) {
     if (file_output) {
         outs_file.open(out_filename);
         if (!outs_file) {
-            throw runtime_error("Failed to open output file.");
+            cerr << "Failed to open output file." << endl;
+            return 1;
         }
     }
     chrono::high_resolution_clock clock;
@@ -203,6 +208,5 @@ int main(int argc, char* argv[]) {
             cout << result << '\n';
         }
     }
-    cout << "done, " << chrono::duration_cast<chrono::milliseconds>(clock.now().time_since_epoch() - startTime.time_since_epoch()).count() << "ms" << endl;
     return 0;
 }
